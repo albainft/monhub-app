@@ -27,6 +27,12 @@
       background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
       color: white;
     }
+    .view-content {
+      display: none;
+    }
+    .view-content.active {
+      display: block;
+    }
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -40,7 +46,7 @@
       <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
         <div class="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 class="text-2xl font-bold text-gray-800">⚙️ Paramètres</h2>
-          <button onclick="closeSettings()" class="p-2 hover:bg-gray-100 rounded-lg">
+          <button id="closeSettingsBtn" class="p-2 hover:bg-gray-100 rounded-lg">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
@@ -53,11 +59,11 @@
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Couleur principale</label>
-                <input type="color" id="primaryColor" value="#9333ea" onchange="updateColors()" class="w-full h-10 rounded-lg cursor-pointer">
+                <input type="color" id="primaryColor" value="#9333ea" class="w-full h-10 rounded-lg cursor-pointer">
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Couleur accent</label>
-                <input type="color" id="accentColor" value="#ec4899" onchange="updateColors()" class="w-full h-10 rounded-lg cursor-pointer">
+                <input type="color" id="accentColor" value="#ec4899" class="w-full h-10 rounded-lg cursor-pointer">
               </div>
             </div>
           </div>
@@ -69,17 +75,17 @@
                 <p class="font-medium">Statut de connexion</p>
                 <p class="text-sm text-gray-600" id="connectionStatus">⚠️ Non connecté</p>
               </div>
-              <button onclick="toggleOneDrive()" id="connectBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <button id="toggleOneDriveBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                 Connecter
               </button>
             </div>
           </div>
 
           <div class="flex gap-4">
-            <button onclick="saveSettings()" class="flex-1 py-3 gradient-primary text-white rounded-lg font-medium hover:shadow-lg">
+            <button id="saveSettingsBtn" class="flex-1 py-3 gradient-primary text-white rounded-lg font-medium hover:shadow-lg">
               💾 Sauvegarder
             </button>
-            <button onclick="resetSettings()" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300">
+            <button id="resetSettingsBtn" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300">
               Réinitialiser
             </button>
           </div>
@@ -107,7 +113,7 @@
             </svg>
             <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
-          <button onclick="openSettings()" class="p-2 hover:bg-gray-100 rounded-lg">
+          <button id="openSettingsBtn" class="p-2 hover:bg-gray-100 rounded-lg">
             <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -186,10 +192,10 @@
     <!-- Main Content -->
     <main class="flex-1 px-6 pb-8">
       <!-- Dashboard View -->
-      <div id="view-dashboard" class="view-content">
+      <div id="view-dashboard" class="view-content active">
         <!-- Zone de dépôt -->
         <div id="dropZone" class="mb-6 border-4 border-dashed border-gray-300 rounded-2xl p-8 bg-gradient-to-br from-orange-50 to-pink-50 cursor-pointer hover:border-purple-500 transition-all">
-          <input type="file" id="fileInput" class="hidden" onchange="handleFileUpload(event)">
+          <input type="file" id="fileInput" class="hidden">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
               <div class="p-4 gradient-primary rounded-xl shadow-lg">
@@ -209,64 +215,28 @@
 
         <!-- Stats -->
         <div class="grid grid-cols-4 gap-6 mb-6">
-          <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500 hover:shadow-lg transition-shadow">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-600 font-medium">Projets</p>
-                <p class="text-3xl font-bold mt-2">3</p>
-                <p class="text-sm text-green-600 mt-1">En cours</p>
-              </div>
-              <div class="p-4 rounded-full bg-purple-100">
-                <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                </svg>
-              </div>
-            </div>
+          <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
+            <p class="text-sm text-gray-600 font-medium">Projets</p>
+            <p class="text-3xl font-bold mt-2">3</p>
+            <p class="text-sm text-green-600 mt-1">En cours</p>
           </div>
 
-          <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition-shadow">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-600 font-medium">Budget</p>
-                <p class="text-3xl font-bold mt-2">2.4k€</p>
-                <p class="text-sm text-green-600 mt-1">Ce mois</p>
-              </div>
-              <div class="p-4 rounded-full bg-blue-100">
-                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-              </div>
-            </div>
+          <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
+            <p class="text-sm text-gray-600 font-medium">Budget</p>
+            <p class="text-3xl font-bold mt-2">2.4k€</p>
+            <p class="text-sm text-green-600 mt-1">Ce mois</p>
           </div>
 
-          <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500 hover:shadow-lg transition-shadow">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-600 font-medium">Documents</p>
-                <p class="text-3xl font-bold mt-2">12</p>
-                <p class="text-sm text-green-600 mt-1">Organisés</p>
-              </div>
-              <div class="p-4 rounded-full bg-purple-100">
-                <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-              </div>
-            </div>
+          <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
+            <p class="text-sm text-gray-600 font-medium">Documents</p>
+            <p class="text-3xl font-bold mt-2">12</p>
+            <p class="text-sm text-green-600 mt-1">Organisés</p>
           </div>
 
-          <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-pink-500 hover:shadow-lg transition-shadow">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-600 font-medium">Révisions</p>
-                <p class="text-3xl font-bold mt-2">5</p>
-                <p class="text-sm text-green-600 mt-1">Aujourd'hui</p>
-              </div>
-              <div class="p-4 rounded-full bg-pink-100">
-                <svg class="w-8 h-8 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-                </svg>
-              </div>
-            </div>
+          <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-pink-500">
+            <p class="text-sm text-gray-600 font-medium">Révisions</p>
+            <p class="text-3xl font-bold mt-2">5</p>
+            <p class="text-sm text-green-600 mt-1">Aujourd'hui</p>
           </div>
         </div>
 
@@ -335,477 +305,304 @@
       </div>
 
       <!-- Projects View -->
-      <div id="view-projects" class="view-content hidden">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-gray-800">📊 Gestion de Projets</h2>
-          <button class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Nouveau projet
-          </button>
-        </div>
-
+      <div id="view-projects" class="view-content">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">📊 Gestion de Projets</h2>
         <div class="space-y-4">
-          <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
-            <div class="flex items-center justify-between mb-4">
-              <div>
-                <h3 class="text-xl font-bold text-gray-800">Site Web Entreprise</h3>
-                <p class="text-sm text-gray-600">12 tâches • Deadline: 15/12/2025</p>
-              </div>
-              <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">En cours</span>
-            </div>
-            <div class="mb-2">
-              <div class="flex justify-between text-sm mb-1">
-                <span class="font-medium">Progression</span>
-                <span class="text-gray-600">75%</span>
-              </div>
-              <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full" style="width: 75%"></div>
-              </div>
+          <div class="bg-white rounded-xl shadow-md p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Site Web Entreprise</h3>
+            <p class="text-sm text-gray-600 mb-4">12 tâches • Deadline: 15/12/2025</p>
+            <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-green-500 to-green-400" style="width: 75%"></div>
             </div>
           </div>
 
-          <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
-            <div class="flex items-center justify-between mb-4">
-              <div>
-                <h3 class="text-xl font-bold text-gray-800">App Mobile</h3>
-                <p class="text-sm text-gray-600">8 tâches • Deadline: 30/11/2025</p>
-              </div>
-              <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">En cours</span>
-            </div>
-            <div class="mb-2">
-              <div class="flex justify-between text-sm mb-1">
-                <span class="font-medium">Progression</span>
-                <span class="text-gray-600">40%</span>
-              </div>
-              <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full" style="width: 40%"></div>
-              </div>
+          <div class="bg-white rounded-xl shadow-md p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">App Mobile</h3>
+            <p class="text-sm text-gray-600 mb-4">8 tâches • Deadline: 30/11/2025</p>
+            <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-blue-500 to-blue-400" style="width: 40%"></div>
             </div>
           </div>
 
-          <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
-            <div class="flex items-center justify-between mb-4">
-              <div>
-                <h3 class="text-xl font-bold text-gray-800">Rapport Annuel</h3>
-                <p class="text-sm text-gray-600">5 tâches • Deadline: 20/11/2025</p>
-              </div>
-              <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">En révision</span>
-            </div>
-            <div class="mb-2">
-              <div class="flex justify-between text-sm mb-1">
-                <span class="font-medium">Progression</span>
-                <span class="text-gray-600">90%</span>
-              </div>
-              <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-purple-500 to-purple-400 rounded-full" style="width: 90%"></div>
-              </div>
+          <div class="bg-white rounded-xl shadow-md p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Rapport Annuel</h3>
+            <p class="text-sm text-gray-600 mb-4">5 tâches • Deadline: 20/11/2025</p>
+            <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-purple-500 to-purple-400" style="width: 90%"></div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Calendar View -->
-      <div id="view-calendar" class="view-content hidden">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-gray-800">📅 Agenda & Calendrier</h2>
-          <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Nouvel événement
-          </button>
-        </div>
-
-        <div class="grid grid-cols-3 gap-6 mb-6">
-          <div class="bg-white rounded-xl shadow-md p-6">
-            <h3 class="font-bold text-gray-800 mb-4">Aujourd'hui - 18 Nov</h3>
-            <div class="space-y-3">
-              <div class="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                <p class="text-xs text-blue-600 font-semibold mb-1">10:00 - RÉUNION</p>
-                <p class="font-medium text-gray-800">Stand-up équipe</p>
-              </div>
-              <div class="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
-                <p class="text-xs text-green-600 font-semibold mb-1">14:30 - TÂCHE</p>
-                <p class="font-medium text-gray-800">Réviser présentation</p>
-              </div>
-              <div class="p-4 bg-purple-50 rounded-lg border-l-4 border-purple-500">
-                <p class="text-xs text-purple-600 font-semibold mb-1">16:00 - RÉVISION</p>
-                <p class="font-medium text-gray-800">Cartes à réviser</p>
-              </div>
+      <div id="view-calendar" class="view-content">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">📅 Agenda</h2>
+        <div class="bg-white rounded-xl shadow-md p-6">
+          <h3 class="font-bold mb-4">Aujourd'hui - 18 Nov</h3>
+          <div class="space-y-3">
+            <div class="p-4 bg-blue-50 rounded-lg">
+              <p class="text-xs text-blue-600 font-semibold">10:00 - RÉUNION</p>
+              <p class="font-medium">Stand-up équipe</p>
             </div>
-          </div>
-
-          <div class="col-span-2 bg-white rounded-xl shadow-md p-6">
-            <h3 class="font-bold text-gray-800 mb-4">Cette semaine</h3>
-            <div class="space-y-3">
-              <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <div class="text-center">
-                  <p class="text-xs text-gray-500">MAR</p>
-                  <p class="text-2xl font-bold text-gray-800">19</p>
-                </div>
-                <div class="flex-1">
-                  <p class="font-medium text-gray-800">Appel client important</p>
-                  <p class="text-sm text-gray-600">15:00 - 16:00</p>
-                </div>
-                <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs">Important</span>
-              </div>
-
-              <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <div class="text-center">
-                  <p class="text-xs text-gray-500">MER</p>
-                  <p class="text-2xl font-bold text-gray-800">20</p>
-                </div>
-                <div class="flex-1">
-                  <p class="font-medium text-gray-800">Deadline Rapport Annuel</p>
-                  <p class="text-sm text-gray-600">Toute la journée</p>
-                </div>
-                <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs">Deadline</span>
-              </div>
-
-              <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <div class="text-center">
-                  <p class="text-xs text-gray-500">JEU</p>
-                  <p class="text-2xl font-bold text-gray-800">21</p>
-                </div>
-                <div class="flex-1">
-                  <p class="font-medium text-gray-800">Réunion d'équipe</p>
-                  <p class="text-sm text-gray-600">10:00 - 11:30</p>
-                </div>
-                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">Réunion</span>
-              </div>
+            <div class="p-4 bg-green-50 rounded-lg">
+              <p class="text-xs text-green-600 font-semibold">14:30 - TÂCHE</p>
+              <p class="font-medium">Réviser présentation</p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Finance View -->
-      <div id="view-finance" class="view-content hidden">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-gray-800">💰 Finance & Budget</h2>
-          <button class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Nouvelle transaction
-          </button>
-        </div>
-
+      <div id="view-finance" class="view-content">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">💰 Finance</h2>
         <div class="grid grid-cols-3 gap-6 mb-6">
-          <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
-            <p class="text-sm text-gray-600 font-medium">Revenus du mois</p>
-            <p class="text-3xl font-bold mt-2 text-green-600">+2.5k€</p>
-            <p class="text-sm text-gray-600 mt-1">+5% vs mois dernier</p>
+          <div class="bg-white rounded-xl shadow-md p-6">
+            <p class="text-sm text-gray-600">Revenus</p>
+            <p class="text-3xl font-bold text-green-600">+2.5k€</p>
           </div>
-
-          <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-red-500">
-            <p class="text-sm text-gray-600 font-medium">Dépenses du mois</p>
-            <p class="text-3xl font-bold mt-2 text-red-600">-1.2k€</p>
-            <p class="text-sm text-gray-600 mt-1">-8% vs mois dernier</p>
+          <div class="bg-white rounded-xl shadow-md p-6">
+            <p class="text-sm text-gray-600">Dépenses</p>
+            <p class="text-3xl font-bold text-red-600">-1.2k€</p>
           </div>
-
-          <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
-            <p class="text-sm text-gray-600 font-medium">Solde</p>
-            <p class="text-3xl font-bold mt-2 text-blue-600">1.3k€</p>
-            <p class="text-sm text-gray-600 mt-1">Économies: +320€</p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-md p-6">
-          <h3 class="text-lg font-bold mb-4">Transactions récentes</h3>
-          <div class="space-y-3">
-            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100">
-              <div class="flex items-center gap-4">
-                <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                <div>
-                  <p class="font-medium text-gray-800">Déjeuner client</p>
-                  <p class="text-sm text-gray-600">Restaurant • 18/11/2025</p>
-                </div>
-              </div>
-              <span class="text-lg font-bold text-red-600">-45.50€</span>
-            </div>
-
-            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100">
-              <div class="flex items-center gap-4">
-                <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                <div>
-                  <p class="font-medium text-gray-800">Facture EDF</p>
-                  <p class="text-sm text-gray-600">Électricité • 17/11/2025</p>
-                </div>
-              </div>
-              <span class="text-lg font-bold text-red-600">-120.00€</span>
-            </div>
-
-            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100">
-              <div class="flex items-center gap-4">
-                <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                <div>
-                  <p class="font-medium text-gray-800">Virement mensuel</p>
-                  <p class="text-sm text-gray-600">Salaire • 15/11/2025</p>
-                </div>
-              </div>
-              <span class="text-lg font-bold text-green-600">+2500.00€</span>
-            </div>
-
-            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100">
-              <div class="flex items-center gap-4">
-                <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                <div>
-                  <p class="font-medium text-gray-800">Abonnement Netflix</p>
-                  <p class="text-sm text-gray-600">Loisirs • 14/11/2025</p>
-                </div>
-              </div>
-              <span class="text-lg font-bold text-red-600">-15.99€</span>
-            </div>
+          <div class="bg-white rounded-xl shadow-md p-6">
+            <p class="text-sm text-gray-600">Solde</p>
+            <p class="text-3xl font-bold text-blue-600">1.3k€</p>
           </div>
         </div>
       </div>
 
       <!-- Documents View -->
-      <div id="view-documents" class="view-content hidden">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-gray-800">📄 Bibliothèque de Documents</h2>
-          <div class="flex gap-2">
-            <button class="p-2 hover:bg-gray-100 rounded-lg">
-              <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-              </svg>
-            </button>
-            <button class="p-2 hover:bg-gray-100 rounded-lg">
-              <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
+      <div id="view-documents" class="view-content">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">📄 Documents</h2>
         <div class="space-y-4">
-          <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-4">
-                <div class="p-3 bg-red-100 rounded-lg">
-                  <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                  </svg>
-                </div>
-                <div>
-                  <h3 class="font-bold text-gray-800">Facture_Electricite.pdf</h3>
-                  <p class="text-sm text-gray-600">Finance • 17/11/2025 • 245 KB</p>
-                </div>
-              </div>
-              <div class="flex gap-2">
-                <button class="p-2 hover:bg-gray-100 rounded-lg">
-                  <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                  </svg>
-                </button>
-                <button class="p-2 hover:bg-gray-100 rounded-lg">
-                  <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
+          <div class="bg-white rounded-xl shadow-md p-6">
+            <h3 class="font-bold">Facture_Electricite.pdf</h3>
+            <p class="text-sm text-gray-600">Finance • 17/11/2025 • 245 KB</p>
           </div>
-
-          <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-4">
-                <div class="p-3 bg-blue-100 rounded-lg">
-                  <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                  </svg>
-                </div>
-                <div>
-                  <h3 class="font-bold text-gray-800">Rapport_Q4.docx</h3>
-                  <p class="text-sm text-gray-600">Projet • 15/11/2025 • 1.2 MB</p>
-                </div>
-              </div>
-              <div class="flex gap-2">
-                <button class="p-2 hover:bg-gray-100 rounded-lg">
-                  <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                  </svg>
-                </button>
-                <button class="p-2 hover:bg-gray-100 rounded-lg">
-                  <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-4">
-                <div class="p-3 bg-purple-100 rounded-lg">
-                  <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                  </svg>
-                </div>
-                <div>
-                  <h3 class="font-bold text-gray-800">Notes_Python.md</h3>
-                  <p class="text-sm text-gray-600">Apprentissage • 14/11/2025 • 48 KB</p>
-                </div>
-              </div>
-              <div class="flex gap-2">
-                <button class="p-2 hover:bg-gray-100 rounded-lg">
-                  <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                  </svg>
-                </button>
-                <button class="p-2 hover:bg-gray-100 rounded-lg">
-                  <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
+          <div class="bg-white rounded-xl shadow-md p-6">
+            <h3 class="font-bold">Rapport_Q4.docx</h3>
+            <p class="text-sm text-gray-600">Projet • 15/11/2025 • 1.2 MB</p>
           </div>
         </div>
       </div>
 
       <!-- Revision View -->
-      <div id="view-revision" class="view-content hidden">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-gray-800">🧠 Système de Révision Espacée</h2>
-          <button class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Nouvelle carte
-          </button>
-        </div>
-
+      <div id="view-revision" class="view-content">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">🧠 Révision</h2>
         <div class="grid grid-cols-3 gap-6 mb-6">
-          <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-pink-500">
-            <p class="text-sm text-gray-600 font-medium">Cartes totales</p>
-            <p class="text-3xl font-bold mt-2">23</p>
-            <p class="text-sm text-gray-600 mt-1">5 à réviser aujourd'hui</p>
+          <div class="bg-white rounded-xl shadow-md p-6">
+            <p class="text-sm text-gray-600">Cartes totales</p>
+            <p class="text-3xl font-bold">23</p>
           </div>
-
-          <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
-            <p class="text-sm text-gray-600 font-medium">Taux de réussite</p>
-            <p class="text-3xl font-bold mt-2">87%</p>
-            <p class="text-sm text-gray-600 mt-1">+5% cette semaine</p>
+          <div class="bg-white rounded-xl shadow-md p-6">
+            <p class="text-sm text-gray-600">Taux de réussite</p>
+            <p class="text-3xl font-bold">87%</p>
           </div>
-
-          <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-orange-500">
-            <p class="text-sm text-gray-600 font-medium">Série actuelle</p>
-            <p class="text-3xl font-bold mt-2">12 jours</p>
-            <p class="text-sm text-gray-600 mt-1">Record: 18 jours</p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-md p-6">
-          <h3 class="text-lg font-bold mb-4">Prochaines révisions</h3>
-          <div class="space-y-4">
-            <div class="p-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg border-l-4 border-pink-500">
-              <p class="font-medium text-gray-800 mb-2">Qu'est-ce que React ?</p>
-              <p class="text-sm text-gray-600 mb-2">Une bibliothèque JavaScript pour créer des interfaces utilisateur</p>
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-gray-500">Prochaine révision: 18/11/2025</span>
-                <div class="flex gap-1">
-                  <div class="w-2 h-2 rounded-full bg-pink-500"></div>
-                  <div class="w-2 h-2 rounded-full bg-pink-500"></div>
-                  <div class="w-2 h-2 rounded-full bg-pink-500"></div>
-                  <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                  <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="p-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg border-l-4 border-pink-500">
-              <p class="font-medium text-gray-800 mb-2">Principe de la répétition espacée ?</p>
-              <p class="text-sm text-gray-600 mb-2">Réviser à intervalles croissants pour optimiser la mémorisation</p>
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-gray-500">Prochaine révision: 19/11/2025</span>
-                <div class="flex gap-1">
-                  <div class="w-2 h-2 rounded-full bg-pink-500"></div>
-                  <div class="w-2 h-2 rounded-full bg-pink-500"></div>
-                  <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                  <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                  <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="p-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg border-l-4 border-pink-500">
-              <p class="font-medium text-gray-800 mb-2">Qu'est-ce que Tailwind CSS ?</p>
-              <p class="text-sm text-gray-600 mb-2">Un framework CSS utility-first pour créer rapidement des interfaces personnalisées</p>
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-gray-500">Prochaine révision: 20/11/2025</span>
-                <div class="flex gap-1">
-                  <div class="w-2 h-2 rounded-full bg-pink-500"></div>
-                  <div class="w-2 h-2 rounded-full bg-pink-500"></div>
-                  <div class="w-2 h-2 rounded-full bg-pink-500"></div>
-                  <div class="w-2 h-2 rounded-full bg-pink-500"></div>
-                  <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                </div>
-              </div>
-            </div>
+          <div class="bg-white rounded-xl shadow-md p-6">
+            <p class="text-sm text-gray-600">Série actuelle</p>
+            <p class="text-3xl font-bold">12 jours</p>
           </div>
         </div>
       </div>
     </main>
   </div>
 
-  <!-- Footer -->
-  <footer class="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg px-4 py-2 text-xs text-gray-600 border">
-    <div class="flex items-center gap-2">
-      <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-      <span>Application prête • LocalStorage activé</span>
-    </div>
-  </footer>
-
   <script>
-    let settings = JSON.parse(localStorage.getItem('hubSettings')) || {
-      primaryColor: '#9333ea',
-      accentColor: '#ec4899',
-      oneDriveConnected: false
-    };
+    (function() {
+      'use strict';
+      
+      let settings = JSON.parse(localStorage.getItem('hubSettings')) || {
+        primaryColor: '#9333ea',
+        accentColor: '#ec4899',
+        oneDriveConnected: false
+      };
 
-    window.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('primaryColor').value = settings.primaryColor;
-      document.getElementById('accentColor').value = settings.accentColor;
-      updateColors();
-      updateOneDriveStatus();
-    });
+      // Initialize when DOM is ready
+      document.addEventListener('DOMContentLoaded', init);
 
-    function showNotification(message, type = 'success') {
-      const notif = document.getElementById('notification');
-      notif.textContent = message;
-      notif.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg animate-slide-in text-white font-medium ${
-        type === 'success' ? 'bg-green-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
-      }`;
-      notif.classList.remove('hidden');
-      setTimeout(() => notif.classList.add('hidden'), 3000);
-    }
+      function init() {
+        // Load settings
+        document.getElementById('primaryColor').value = settings.primaryColor;
+        document.getElementById('accentColor').value = settings.accentColor;
+        updateColors();
+        updateOneDriveStatus();
 
-    function openSettings() {
-      document.getElementById('settingsModal').classList.remove('hidden');
-    }
+        // Setup all event listeners
+        setupEventListeners();
+      }
 
-    function closeSettings() {
-      document.getElementById('settingsModal').classList.add('hidden');
-    }
+      function setupEventListeners() {
+        // Navigation
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            navigateTo(this.getAttribute('data-view'));
+          });
+        });
 
-    function saveSettings() {
-      settings.primaryColor = document.getElementById('primaryColor').value;
-      settings.accentColor = document.getElementById('accentColor').value;
-      localStorage.setItem('hubSettings', JSON.stringify(settings));
-      updateColors();
-      closeSettings();
-      showNotification('Paramètres sauvegardés avec succès !');
-    }
+        // Settings
+        document.getElementById('openSettingsBtn').addEventListener('click', openSettings);
+        document.getElementById('closeSettingsBtn').addEventListener('click', closeSettings);
+        document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+        document.getElementById('resetSettingsBtn').addEventListener('click', resetSettings);
+        document.getElementById('toggleOneDriveBtn').addEventListener('click', toggleOneDrive);
+        document.getElementById('primaryColor').addEventListener('change', updateColors);
+        document.getElementById('accentColor').addEventListener('change', updateColors);
 
-    function resetSettings() {
-      settings = { primaryColor: '#9333ea', accentColor: '#ec4899', oneDriveConnected: false };
-      localStorage.setItem('hubSettings', JSON.stringify(settings));
-      document.getElementById('primaryColor').value = settings.primaryColor;
-      document.
+        // File upload
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', handleDragOver);
+        dropZone.addEventListener('dragleave', handleDragLeave);
+        dropZone.addEventListener('drop', handleDrop);
+        fileInput.addEventListener('change', handleFileSelect);
+      }
+
+      function navigateTo(viewName) {
+        // Hide all views
+        document.querySelectorAll('.view-content').forEach(view => {
+          view.classList.remove('active');
+        });
+
+        // Show selected view
+        const targetView = document.getElementById('view-' + viewName);
+        if (targetView) {
+          targetView.classList.add('active');
+        }
+
+        // Update nav buttons
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          btn.classList.remove('active-nav');
+          btn.classList.add('text-gray-700', 'hover:bg-gray-100');
+        });
+
+        const activeBtn = document.querySelector('[data-view="' + viewName + '"]');
+        if (activeBtn) {
+          activeBtn.classList.add('active-nav');
+          activeBtn.classList.remove('text-gray-700', 'hover:bg-gray-100');
+        }
+      }
+
+      function showNotification(message, type) {
+        const notif = document.getElementById('notification');
+        notif.textContent = message;
+        const bgColor = type === 'success' ? 'bg-green-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
+        notif.className = 'fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg animate-slide-in text-white font-medium ' + bgColor;
+        notif.classList.remove('hidden');
+        setTimeout(() => notif.classList.add('hidden'), 3000);
+      }
+
+      function openSettings() {
+        document.getElementById('settingsModal').classList.remove('hidden');
+      }
+
+      function closeSettings() {
+        document.getElementById('settingsModal').classList.add('hidden');
+      }
+
+      function saveSettings() {
+        settings.primaryColor = document.getElementById('primaryColor').value;
+        settings.accentColor = document.getElementById('accentColor').value;
+        localStorage.setItem('hubSettings', JSON.stringify(settings));
+        updateColors();
+        closeSettings();
+        showNotification('Paramètres sauvegardés avec succès !', 'success');
+      }
+
+      function resetSettings() {
+        settings = { primaryColor: '#9333ea', accentColor: '#ec4899', oneDriveConnected: false };
+        localStorage.setItem('hubSettings', JSON.stringify(settings));
+        document.getElementById('primaryColor').value = settings.primaryColor;
+        document.getElementById('accentColor').value = settings.accentColor;
+        updateColors();
+        updateOneDriveStatus();
+        showNotification('Paramètres réinitialisés', 'warning');
+      }
+
+      function updateColors() {
+        const primaryColor = document.getElementById('primaryColor').value;
+        const accentColor = document.getElementById('accentColor').value;
+        document.documentElement.style.setProperty('--color-primary', primaryColor);
+        document.documentElement.style.setProperty('--color-accent', accentColor);
+      }
+
+      function toggleOneDrive() {
+        settings.oneDriveConnected = !settings.oneDriveConnected;
+        localStorage.setItem('hubSettings', JSON.stringify(settings));
+        updateOneDriveStatus();
+        showNotification(
+          settings.oneDriveConnected ? 'OneDrive connecté avec succès !' : 'OneDrive déconnecté',
+          settings.oneDriveConnected ? 'success' : 'warning'
+        );
+      }
+
+      function updateOneDriveStatus() {
+        const status = document.getElementById('oneDriveStatus');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const connectBtn = document.getElementById('toggleOneDriveBtn');
+
+        if (settings.oneDriveConnected) {
+          status.innerHTML = '<div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div><span class="text-xs text-green-700">OneDrive</span>';
+          status.className = 'flex items-center gap-1 px-2 py-1 bg-green-100 rounded-full';
+          connectionStatus.textContent = '✅ Connecté';
+          connectBtn.textContent = 'Déconnecter';
+        } else {
+          status.innerHTML = '<div class="w-2 h-2 bg-red-500 rounded-full"></div><span class="text-xs text-red-700">Hors ligne</span>';
+          status.className = 'flex items-center gap-1 px-2 py-1 bg-red-100 rounded-full';
+          connectionStatus.textContent = '⚠️ Non connecté';
+          connectBtn.textContent = 'Connecter';
+        }
+      }
+
+      function handleDragOver(e) {
+        e.preventDefault();
+        this.classList.add('border-purple-500', 'bg-purple-50');
+      }
+
+      function handleDragLeave() {
+        this.classList.remove('border-purple-500', 'bg-purple-50');
+      }
+
+      function handleDrop(e) {
+        e.preventDefault();
+        this.classList.remove('border-purple-500', 'bg-purple-50');
+        if (e.dataTransfer.files[0]) {
+          processFile(e.dataTransfer.files[0]);
+        }
+      }
+
+      function handleFileSelect(e) {
+        if (e.target.files[0]) {
+          processFile(e.target.files[0]);
+        }
+      }
+
+      function processFile(file) {
+        const fileName = file.name.toLowerCase();
+        let category = 'Documents';
+        let targetExcel = 'Documents.xlsx';
+
+        if (fileName.includes('facture') || fileName.includes('invoice') || fileName.includes('reçu')) {
+          category = 'Finance';
+          targetExcel = 'Budget.xlsx';
+        } else if (fileName.includes('projet') || fileName.includes('task') || fileName.includes('rapport')) {
+          category = 'Projets';
+          targetExcel = 'Projets.xlsx';
+        } else if (fileName.includes('cours') || fileName.includes('note') || fileName.includes('apprentissage')) {
+          category = 'Révision';
+          targetExcel = 'Révision.xlsx';
+        }
+
+        showNotification('✅ "' + file.name + '" analysé et classé dans ' + category + ' → ' + targetExcel, 'success');
+
+        if (settings.oneDriveConnected) {
+          setTimeout(() => {
+            showNotification('☁️ Fichier synchronisé sur OneDrive dans /' + category + '/', 'info');
+          }, 1500);
+        }
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MonHub - Productivité</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .animate-slide-in {
+      animation: slideIn 0.3s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const { 
+      Calendar, BarChart3, FileText, Brain, DollarSign, Upload, Search, 
+      Bell, Settings, Home, Grid, TrendingUp, Clock, CheckSquare, Plus, 
+      X, Save, Palette, Layout, Folder, Zap, Filter, SortAsc, Download, 
+      Edit2, Trash2, Eye 
+    } = lucide;
+
+    // Données initiales
+    const initialSettings = {
+      theme: 'light',
+      primaryColor: '#9333ea',
+      accentColor: '#ec4899',
+      modules: {
+        projects: true,
+        calendar: true,
+        finance: true,
+        documents: true,
+        revision: true
+      },
+      onedrive: {
+        connected: false,
+        syncFrequency: 'auto',
+        excelPaths: {
+          budget: '/MonHub_Productivité/Budget.xlsx',
+          projects: '/MonHub_Productivité/Projets.xlsx',
+          calendar: '/MonHub_Productivité/Agenda.xlsx',
+          revision: '/MonHub_Productivité/Révision.xlsx'
+        }
+      },
+      aiRules: [
+        { type: 'facture', keywords: ['facture', 'invoice'], target: 'budget', folder: '/Finances/Factures' },
+        { type: 'projet', keywords: ['projet', 'task'], target: 'projects', folder: '/Projets' },
+        { type: 'étude', keywords: ['cours', 'note'], target: 'revision', folder: '/Apprentissage' }
+      ]
+    };
+
+    const ProductivityHub = () => {
+      const [settings, setSettings] = useState(() => {
+        const saved = localStorage.getItem('hubSettings');
+        return saved ? JSON.parse(saved) : initialSettings;
+      });
+      
+      const [activeView, setActiveView] = useState('dashboard');
+      const [showSettings, setShowSettings] = useState(false);
+      const [dropZoneActive, setDropZoneActive] = useState(false);
+      const [notification, setNotification] = useState(null);
+
+      const [projects] = useState([
+        { id: 1, name: 'Site Web Entreprise', progress: 75, status: 'active', deadline: '2025-12-15', tasks: 12 },
+        { id: 2, name: 'App Mobile', progress: 40, status: 'active', deadline: '2025-11-30', tasks: 8 },
+        { id: 3, name: 'Rapport Annuel', progress: 90, status: 'review', deadline: '2025-11-20', tasks: 5 }
+      ]);
+      
+      const [transactions] = useState([
+        { id: 1, date: '2025-11-18', amount: -45.50, category: 'Restaurant', description: 'Déjeuner client' },
+        { id: 2, date: '2025-11-17', amount: -120.00, category: 'Électricité', description: 'Facture EDF' },
+        { id: 3, date: '2025-11-15', amount: 2500.00, category: 'Salaire', description: 'Virement mensuel' }
+      ]);
+
+      const [documents] = useState([
+        { id: 1, name: 'Facture_Electricite.pdf', type: 'pdf', category: 'Finance', date: '2025-11-17', size: '245 KB' },
+        { id: 2, name: 'Rapport_Q4.docx', type: 'document', category: 'Projet', date: '2025-11-15', size: '1.2 MB' },
+        { id: 3, name: 'Notes_Python.md', type: 'note', category: 'Apprentissage', date: '2025-11-14', size: '48 KB' }
+      ]);
+
+      const [flashcards] = useState([
+        { id: 1, question: 'Qu\'est-ce que React ?', answer: 'Une bibliothèque JavaScript', nextReview: '2025-11-18', level: 3 },
+        { id: 2, question: 'Principe répétition espacée ?', answer: 'Réviser à intervalles croissants', nextReview: '2025-11-19', level: 2 }
+      ]);
+
+      useEffect(() => {
+        localStorage.setItem('hubSettings', JSON.stringify(settings));
+      }, [settings]);
+
+      const showNotification = (message, type = 'success') => {
+        setNotification({ message, type });
+        setTimeout(() => setNotification(null), 3000);
+      };
+
+      const handleFileUpload = (file) => {
+        const fileName = file.name.toLowerCase();
+        let category = 'Autre';
+        
+        settings.aiRules.forEach(rule => {
+          if (rule.keywords.some(keyword => fileName.includes(keyword))) {
+            category = rule.type;
+          }
+        });
+
+        showNotification(`✅ Document "${file.name}" analysé et classé dans ${category}`);
+      };
+
+      const Icon = ({ icon, className, style }) => {
+        const IconComponent = icon;
+        return React.createElement(IconComponent, { className, style });
+      };
+
+      const StatCard = ({ title, value, change, icon, color }) => (
+        <div className="bg-white rounded-xl shadow-md p-6 border-l-4 hover:shadow-lg transition-shadow" style={{ borderColor: color }}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 font-medium">{title}</p>
+              <p className="text-3xl font-bold mt-2">{value}</p>
+              <p className="text-sm text-green-600 mt-1">{change}</p>
+            </div>
+            <div className="p-4 rounded-full" style={{ backgroundColor: `${color}20` }}>
+              <Icon icon={icon} className="w-8 h-8" style={{ color }} />
+            </div>
+          </div>
+        </div>
+      );
+
+      const SettingsPanel = () => (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-800">⚙️ Paramètres</h2>
+              <button onClick={() => setShowSettings(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <Icon icon={X} className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+              <div className="mb-8">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                  <Icon icon={Palette} className="w-5 h-5" />
+                  Apparence
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Couleur principale</label>
+                    <input 
+                      type="color" 
+                      value={settings.primaryColor}
+                      onChange={(e) => setSettings({...settings, primaryColor: e.target.value})}
+                      className="w-full h-10 rounded-lg cursor-pointer"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Couleur accent</label>
+                    <input 
+                      type="color" 
+                      value={settings.accentColor}
+                      onChange={(e) => setSettings({...settings, accentColor: e.target.value})}
+                      className="w-full h-10 rounded-lg cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-8">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                  <Icon icon={Layout} className="w-5 h-5" />
+                  Modules actifs
+                </h3>
+                <div className="space-y-3">
+                  {Object.entries(settings.modules).map(([key, value]) => (
+                    <label key={key} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                      <span className="font-medium capitalize">{key === 'calendar' ? 'Agenda' : key}</span>
+                      <input 
+                        type="checkbox" 
+                        checked={value}
+                        onChange={(e) => setSettings({
+                          ...settings, 
+                          modules: {...settings.modules, [key]: e.target.checked}
+                        })}
+                        className="w-5 h-5 rounded"
+                      />
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mb-8">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                  <Icon icon={Folder} className="w-5 h-5" />
+                  Configuration OneDrive
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                    <div>
+                      <p className="font-medium">Statut de connexion</p>
+                      <p className="text-sm text-gray-600">
+                        {settings.onedrive.connected ? '✅ Connecté' : '⚠️ Non connecté'}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        setSettings({
+                          ...settings,
+                          onedrive: {...settings.onedrive, connected: !settings.onedrive.connected}
+                        });
+                        showNotification(
+                          settings.onedrive.connected ? 'OneDrive déconnecté' : 'OneDrive connecté !',
+                          settings.onedrive.connected ? 'warning' : 'success'
+                        );
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      {settings.onedrive.connected ? 'Déconnecter' : 'Connecter'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => {
+                    setShowSettings(false);
+                    showNotification('Paramètres sauvegardés !');
+                  }}
+                  className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:shadow-lg"
+                >
+                  Sauvegarder
+                </button>
+                <button 
+                  onClick={() => {
+                    setSettings(initialSettings);
+                    showNotification('Paramètres réinitialisés', 'warning');
+                  }}
+                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300"
+                >
+                  Réinitialiser
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+          {notification && (
+            <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg animate-slide-in ${
+              notification.type === 'success' ? 'bg-green-500' : 
+              notification.type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+            } text-white font-medium flex items-center gap-3`}>
+              <span>{notification.message}</span>
+              <button onClick={() => setNotification(null)}>
+                <Icon icon={X} className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+
+          {showSettings && <SettingsPanel />}
+
+          <header className="bg-white shadow-sm border-b border-gray-200">
+            <div className="max-w-7xl mx-auto px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${settings.primaryColor}, ${settings.accentColor})` }}>
+                      <Icon icon={Grid} className="w-6 h-6 text-white" />
+                    </div>
+                    <h1 className="text-2xl font-bold" style={{ background: `linear-gradient(135deg, ${settings.primaryColor}, ${settings.accentColor})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                      MonHub
+                    </h1>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <button className="relative p-2 hover:bg-gray-100 rounded-lg">
+                    <Icon icon={Bell} className="w-5 h-5 text-gray-600" />
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                  </button>
+                  <button onClick={() => setShowSettings(true)} className="p-2 hover:bg-gray-100 rounded-lg">
+                    <Icon icon={Settings} className="w-5 h-5 text-gray-600" />
+                  </button>
+                  <div className="flex items-center gap-2 ml-2">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold" style={{ background: `linear-gradient(135deg, ${settings.primaryColor}, ${settings.accentColor})` }}>
+                      JD
+                    </div>
+                    <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${settings.onedrive.connected ? 'bg-green-100' : 'bg-red-100'}`}>
+                      <div className={`w-2 h-2 rounded-full ${settings.onedrive.connected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
+                      <span className={`text-xs ${settings.onedrive.connected ? 'text-green-700' : 'text-red-700'}`}>
+                        {settings.onedrive.connected ? 'OneDrive' : 'Hors ligne'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <div className="max-w-7xl mx-auto px-6 py-6">
+            <div 
+              className={`mb-6 border-4 border-dashed rounded-2xl p-8 transition-all cursor-pointer ${
+                dropZoneActive ? 'border-purple-500 bg-purple-50' : 'border-gray-300 bg-gradient-to-br from-orange-50 to-pink-50'
+              }`}
+              onDragOver={(e) => { e.preventDefault(); setDropZoneActive(true); }}
+              onDragLeave={() => setDropZoneActive(false)}
+              onDrop={(e) => { 
+                e.preventDefault(); 
+                setDropZoneActive(false);
+                if (e.dataTransfer.files[0]) handleFileUpload(e.dataTransfer.files[0]);
+              }}
+              onClick={() => document.getElementById('fileInput').click()}
+            >
+              <input 
+                id="fileInput" 
+                type="file" 
+                className="hidden" 
+                onChange={(e) => e.target.files[0] && handleFileUpload(e.target.files[0])}
+              />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-4 bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl shadow-lg">
+                    <Icon icon={Upload} className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800">🚀 Zone de Dépôt IA</h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Cliquez ou déposez • Analyse auto • Classement intelligent
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 gap-6 mb-6">
+              <StatCard title="Projets" value="3" change="+1 cette semaine" icon={CheckSquare} color={settings.primaryColor} />
+              <StatCard title="Budget" value="2.4k€" change="Mois en cours" icon={DollarSign} color="#3b82f6" />
+              <StatCard title="Documents" value={documents.length} change="Organisés" icon={FileText} color="#8b5cf6" />
+              <StatCard title="Cartes" value={flashcards.length} change="À réviser" icon={Brain} color={settings.accentColor} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-white rounded-xl shadow-md p-6">
+                <h3 className="text-lg font-bold mb-4">Projets en cours</h3>
+                <div className="space-y-4">
+                  {projects.map(p => (
+                    <div key={p.id}>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span className="font-medium">{p.name}</span>
+                        <span className="text-gray-600">{p.progress}%</span>
+                      </div>
+                      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full" style={{width: `${p.progress}%`}} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-md p-6">
+                <h3 className="text-lg font-bold mb-4">Documents récents</h3>
+                <div className="space-y-3">
+                  {documents.map(doc => (
+                    <div key={doc.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                      <Icon icon={FileText} className="w-5 h-5 text-purple-600" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{doc.name}</p>
+                        <p className="text-xs text-gray-500">{doc.category}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <footer className="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg px-4 py-2 text-xs text-gray-600 border">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span>Prêt à l'emploi • LocalStorage</span>
+            </div>
+          </footer>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<ProductivityHub />);
+  </script>
+</body>
+</html>
